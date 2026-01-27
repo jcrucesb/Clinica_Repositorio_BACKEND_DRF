@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Datos Usuario</title>
+    <style>
+      .section-title {
+        background-color: #c6a2e7;
+        padding: 10px;
+        font-weight: bold;
+        border-top: 2px solid #000;
+      }
+      .data-row {
+        display: flex;
+        border-bottom: 1px solid #ddd;
+      }
+      .data-label {
+        flex: 1;
+        font-weight: bold;
+        padding: 8px;
+        background-color: #e8e3f0;
+      }
+      .data-value {
+        flex: 2;
+        padding: 8px;
+      }
+      .warning {
+        background-color: #ffcccc;
+        padding: 15px;
+        text-align: center;
+        margin: 20px 0;
+        border: 1px solid red;
+      }
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        background-color: #f8f9fa;
+        padding: 20px;
+      }
+      .payment-section {
+        background-color: #fff3cd;
+        padding: 15px;
+        margin-top: 20px;
+        border-left: 4px solid #ffc107;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1 style="text-align: center; color: #383737;">Usuario Registrado Corectamente</h1>
+      
+      <div class="warning">
+        <strong>Recordatorio importante:</strong> Este correo es solo informativo, favor de no responder.
+      </div>
+
+      <!-- Datos del paciente -->
+      <div class="section-title">Usuario Paciente</div>
+      <div class="data-row">
+        <div class="data-label">Nombre:</div>
+        <div class="data-value">{{primer_nombre}} {{segundo_nombre}} {{ap_paterno}} {{ap_materno}}</div>
+      </div>
+      <div class="data-row">
+        <div class="data-label">Email:</div>
+        <div class="data-value">{{email}}</div>
+      </div>
+      <div class="data-row">
+        <div class="data-label">RUT:</div>
+        <div class="data-value">{{rut}}</div>
+      </div>
+      <div class="data-row">
+        <div class="data-label">Username:</div>
+        <div class="data-value">{{username}}</div>
+      </div>
+      <div class="data-row">
+        <div class="data-label">Password:</div>
+        <div class="data-value">{{password}}</div>
+      </div>
+        
+      <div class="data-row">
+        <div class="data-label">Información:</div>
+        <div class="data-value" style="font-weight: bold; color: #d32f2f;">Utilizar Username y Password para Ingresar al portal Paciente</div>
+      </div>
+    </div>
+      
+      <div style="margin-top: 30px; text-align: center; font-size: 0.9em; color: #666;">
+        ***Recuerde que puede cambiar sus datos desde su: <strong>Panel Paciente</strong>***
+      </div>
+    </div>
+  </body>
+</html>
