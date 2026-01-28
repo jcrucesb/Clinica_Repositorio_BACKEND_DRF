@@ -150,12 +150,12 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'usuarios.CustomersUsers'
 
 #Configuracion de Correo EMAIL para el envío de correos.
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = "smtp.gmail.com"
-EMAIL_USE_TLS = True
-EMAIL_PORT = 587
-EMAIL_HOST_USER = "jaircrucesb@gmail.com"
-EMAIL_HOST_PASSWORD = "godjbyrzlhlzpiyk"
+EMAIL_BACKEND = ""
+EMAIL_HOST = ""
+EMAIL_USE_TLS = 
+EMAIL_PORT = 
+EMAIL_HOST_USER = ""
+EMAIL_HOST_PASSWORD = ""
 
 # Configuración de Django Rest Framework (DRF)
 # Este código siempre debe estar.
