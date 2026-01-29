@@ -1494,7 +1494,7 @@ def correo_res_pagada(reserva_uuid, fk_descuento):
                 # Creación del correo.
                 subject = "Correo Verificación Reserva"
                 # Crearemos el envío de correos.
-                template = render_to_string("pacientes\correo_reserva.html",{
+                template = render_to_string("pacientes/correo_reserva.html",{
                     'nombre_paciente': nombre_completo,
                     'rut_paciente': rut,
                     'email_paciente': email,
