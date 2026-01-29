@@ -27,9 +27,7 @@ DEBUG = False
 
 ALLOWED_HOSTS = []
 
-CORS_ALLOWED_ORIGINS = [
-    '',
-]
+ALLOWED_HOSTS = ['jacruces91.pythonanywhere.com', 'localhost', '127.0.0.1']
 
 # Application definition
 #CORS_ALLOW_CREDENTIALS = True

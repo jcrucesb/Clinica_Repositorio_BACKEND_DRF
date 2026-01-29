@@ -530,7 +530,7 @@ def generar_correo_reserv_index(reserva_uuid, tipo_pago):
             # Creación del correo.
             subject = "Correo Verificación Reserva"
             # Crearemos el envío de correos.  
-            template = render_to_string("pacientes_no_registrado\correo_reserva.html",{
+            template = render_to_string("pacientes_no_registrado/correo_reserva.html",{
                 'nombre_paciente': nombre_completo,
                 'rut_paciente': rut,
                 'email_paciente': email,
@@ -557,44 +557,98 @@ def generar_correo_reserv_index(reserva_uuid, tipo_pago):
                 'reserva_pagada': 'Sí',
                 'valor_base': valor_base,
             })
-            # Generar el PDF
+            # # Generar el PDF
+            # nombre_carpeta = "Boleta_PDF_PACIENTES"
+            # ruta = f"C:\\Users\\Plask91\\Documents\\Clinica\\clinica\\Clinica_DRF\\{nombre_carpeta}"
+            # if not os.path.exists(ruta):
+            #     os.makedirs(ruta)
+            #     print(f"Carpeta creada en: {ruta}")
+            # else:
+            #     pass
+            # now = datetime.now()
+            # filename = f"Boleta_Reserva_Cita_{nombre_completo}_{now.strftime('%Y-%m-%d_%H-%M-%S')}.pdf"
+            # # Creación del PDF.
+            # config = pdfkit.configuration(wkhtmltopdf='C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe')
+            # # Configuración de pdfkit
+            # options = {
+            #     'enable-local-file-access': None,
+            #     # 'orientation': 'Landscape',
+            #     # 'page-size': 'A4',
+            #     # 'margin-top': '0.2in', 
+            #     # 'margin-bottom': '0.2in',
+            #     # 'encoding': "UTF-8",
+            # }
+            # print("Adjunto..........")
+            # # template; Pertenece 
+            # pdf = pdfkit.from_string(template, f"C:\\Users\\Plask91\\Documents\\Clinica\\clinica\\Clinica_DRF\\{nombre_carpeta}\\{filename}", configuration=config, options=options)
+            # # Envío del mensaje. Debemos pasar el template.
+            # emailSender = EmailMessage(
+            #     subject,
+            #     template,
+            #     settings.EMAIL_HOST_USER,
+            #     ["matiasfamilycrew@gmail.com"],
+            # )
+            # # print("Creacion del correo ")
+            # # Formato del mensaje en HTML.
+            # emailSender.content_subtype = "html"
+            # emailSender.fail_silently = False
+            # # Agregamos el PDF que hemos creado como adjunto al correo.
+            # emailSender.attach_file(f"C:\\Users\\Plask91\\Documents\\Clinica\\clinica\\Clinica_DRF\\{nombre_carpeta}\\{filename}")
+            # # Enviamos el correo.
+            # emailSender.send()
+            # --- Generar el PDF ---
             nombre_carpeta = "Boleta_PDF_PACIENTES"
-            ruta = f"C:\\Users\\Plask91\\Documents\\Clinica\\clinica\\Clinica_DRF\\{nombre_carpeta}"
-            if not os.path.exists(ruta):
-                os.makedirs(ruta)
-                print(f"Carpeta creada en: {ruta}")
-            else:
-                pass
+
+            # Usamos BASE_DIR para que la ruta sea automática según el sistema (Linux o Windows)
+            # En PythonAnywhere esto apuntará a /home/tu-usuario/tu-proyecto/Boleta_PDF_PACIENTES
+            ruta_carpeta = os.path.join(settings.BASE_DIR, nombre_carpeta)
+
+            if not os.path.exists(ruta_carpeta):
+                os.makedirs(ruta_carpeta)
+                print(f"Carpeta verificada/creada en: {ruta_carpeta}")
+
             now = datetime.now()
-            filename = f"Boleta_Reserva_Cita_{nombre_completo}_{now.strftime('%Y-%m-%d_%H-%M-%S')}.pdf"
-            # Creación del PDF.
-            config = pdfkit.configuration(wkhtmltopdf='C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe')
-            # Configuración de pdfkit
+            # Limpiamos el nombre para evitar problemas de caracteres en Linux
+            nombre_limpio = nombre_completo.replace(" ", "_")
+            filename = f"Boleta_Reserva_Cita_{nombre_limpio}_{now.strftime('%Y-%m-%d_%H-%M-%S')}.pdf"
+
+            # Definimos la ruta completa del archivo
+            ruta_archivo_pdf = os.path.join(ruta_carpeta, filename)
+
+            # --- Configuración de pdfkit ---
+            # Detectamos el sistema para evitar el error de ruta del .exe en Linux
+            if os.name == 'nt':  # Windows
+                path_wkhtmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
+                config = pdfkit.configuration(wkhtmltopdf=path_wkhtmltopdf)
+            else:  # Linux (PythonAnywhere)
+                # En Linux suele estar instalado en el PATH global
+                config = pdfkit.configuration()
+
             options = {
                 'enable-local-file-access': None,
-                # 'orientation': 'Landscape',
-                # 'page-size': 'A4',
-                # 'margin-top': '0.2in', 
-                # 'margin-bottom': '0.2in',
-                # 'encoding': "UTF-8",
             }
-            print("Adjunto..........")
-            # template; Pertenece 
-            pdf = pdfkit.from_string(template, f"C:\\Users\\Plask91\\Documents\\Clinica\\clinica\\Clinica_DRF\\{nombre_carpeta}\\{filename}", configuration=config, options=options)
-            # Envío del mensaje. Debemos pasar el template.
+
+            print("Generando PDF y adjuntando...")
+
+            # Generar el PDF usando la ruta dinámica
+            # Eliminamos las rutas C:\\Users... fijas que causan errores en Bash
+            pdfkit.from_string(template, ruta_archivo_pdf, configuration=config, options=options)
+
+            # --- Envío del mensaje ---
             emailSender = EmailMessage(
                 subject,
                 template,
                 settings.EMAIL_HOST_USER,
                 ["matiasfamilycrew@gmail.com"],
             )
-            # print("Creacion del correo ")
-            # Formato del mensaje en HTML.
+
             emailSender.content_subtype = "html"
             emailSender.fail_silently = False
-            # Agregamos el PDF que hemos creado como adjunto al correo.
-            emailSender.attach_file(f"C:\\Users\\Plask91\\Documents\\Clinica\\clinica\\Clinica_DRF\\{nombre_carpeta}\\{filename}")
-            # Enviamos el correo.
+
+            # Agregamos el PDF usando la ruta dinámica universal
+            emailSender.attach_file(ruta_archivo_pdf)
+
+            # Enviamos el correo
             emailSender.send()
         #
         if metodo_pago == "1":
@@ -603,7 +657,7 @@ def generar_correo_reserv_index(reserva_uuid, tipo_pago):
             # Creación del correo.
             subject = "Correo Verificación Reserva"
             # Crearemos el envío de correos.
-            template = render_to_string("pacientes_no_registrado\correo_reserva.html",{
+            template = render_to_string("pacientes_no_registrado/correo_reserva.html",{
                 'nombre_paciente': nombre_completo,
                 'rut_paciente': rut,
                 'email_paciente': email,
@@ -632,43 +686,99 @@ def generar_correo_reserv_index(reserva_uuid, tipo_pago):
                 'monto': metodo_credito.monto,
                 'reserva_pagada': 'Sí',
             })
-            # Generar el PDF
-            ruta = f"C:\\Users\\Plask91\\Documents\\Clinica\\clinica\\Clinica_DRF\\Boleta_PDF_PACIENTES"
-            if not os.path.exists(ruta):
-                os.makedirs(ruta)
-                print(f"Carpeta creada en: {ruta}")
-            else:
-                pass
+            # # Generar el PDF
+            # ruta = f"C:\\Users\\Plask91\\Documents\\Clinica\\clinica\\Clinica_DRF\\Boleta_PDF_PACIENTES"
+            # if not os.path.exists(ruta):
+            #     os.makedirs(ruta)
+            #     print(f"Carpeta creada en: {ruta}")
+            # else:
+            #     pass
+            # now = datetime.now()
+            # filename = f"Boleta_Reserva_Cita_{nombre_completo}_{now.strftime('%Y-%m-%d_%H-%M-%S')}.pdf"
+            # # Creación del PDF.
+            # config = pdfkit.configuration(wkhtmltopdf='C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe')
+            # options = {
+            #     'enable-local-file-access': None,
+            #     # 'orientation': 'Landscape',
+            #     # 'page-size': 'A4',
+            #     # 'margin-top': '0.2in',
+            #     # 'margin-bottom': '0.2in',
+            #     # 'encoding': "UTF-8",
+            # }
+            # print("Adjunto..........")
+            # # template; Pertenece 
+            # pdf = pdfkit.from_string(template, f"C:\\Users\\Plask91\\Documents\\Clinica\\clinica\\Clinica_DRF\\Boleta_PDF_PACIENTES\\{filename}", configuration=config, options=options)
+            # # Envío del mensaje. Debemos pasar el template.
+            # emailSender = EmailMessage(
+            #     subject, 
+            #     template,
+            #     settings.EMAIL_HOST_USER,
+            #     ["matiasfamilycrew@gmail.com"],
+            # )
+            # # print("Creacion del correo ")
+            # # Formato del mensaje en HTML.
+            # emailSender.content_subtype = "html"
+            # emailSender.fail_silently = False
+            # # Agregamos el PDF que hemos creado como adjunto al correo.
+            # emailSender.attach_file(f"C:\\Users\\Plask91\\Documents\\Clinica\\clinica\\Clinica_DRF\\Boleta_PDF_PACIENTES\\{filename}")
+            # # Enviamos el correo.
+            # emailSender.send()
+            # --- Generar el PDF ---
+            # 1. Definimos el nombre de la carpeta y la ruta dinámica
+            nombre_carpeta = "Boleta_PDF_PACIENTES"
+            # Usamos BASE_DIR para que funcione en cualquier sistema operativo
+            ruta_base_pdf = os.path.join(settings.BASE_DIR, nombre_carpeta)
+
+            if not os.path.exists(ruta_base_pdf):
+                os.makedirs(ruta_base_pdf)
+                print(f"Carpeta verificada/creada en: {ruta_base_pdf}")
+
+            # 2. Preparamos el nombre del archivo
             now = datetime.now()
-            filename = f"Boleta_Reserva_Cita_{nombre_completo}_{now.strftime('%Y-%m-%d_%H-%M-%S')}.pdf"
-            # Creación del PDF.
-            config = pdfkit.configuration(wkhtmltopdf='C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe')
+            # Reemplazamos espacios por guiones bajos para evitar errores en rutas de Linux
+            nombre_limpio = nombre_completo.replace(" ", "_")
+            filename = f"Boleta_Reserva_Cita_{nombre_limpio}_{now.strftime('%Y-%m-%d_%H-%M-%S')}.pdf"
+
+            # 3. Ruta completa final del archivo (Universal)
+            ruta_archivo_final = os.path.join(ruta_base_pdf, filename)
+
+            # 4. Configuración de pdfkit (Detección automática de SO)
+            # Esto evita que PythonAnywhere busque un archivo .exe que no existe
+            if os.name == 'nt':  # Si estás en Windows (Local)
+                path_wkhtmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
+                config = pdfkit.configuration(wkhtmltopdf=path_wkhtmltopdf)
+            else:  # Si estás en Linux (PythonAnywhere)
+                config = pdfkit.configuration()
+
             options = {
                 'enable-local-file-access': None,
-                # 'orientation': 'Landscape',
-                # 'page-size': 'A4',
-                # 'margin-top': '0.2in',
-                # 'margin-bottom': '0.2in',
-                # 'encoding': "UTF-8",
             }
-            print("Adjunto..........")
-            # template; Pertenece 
-            pdf = pdfkit.from_string(template, f"C:\\Users\\Plask91\\Documents\\Clinica\\clinica\\Clinica_DRF\\Boleta_PDF_PACIENTES\\{filename}", configuration=config, options=options)
-            # Envío del mensaje. Debemos pasar el template.
+
+            print(f"Generando PDF en: {ruta_archivo_final}")
+
+            # 5. Creación del PDF
+            # Eliminamos la ruta manual C:\\Users... para usar la variable dinámica
+            pdfkit.from_string(template, ruta_archivo_final, configuration=config, options=options)
+
+            # --- Envío del mensaje ---
+
             emailSender = EmailMessage(
                 subject, 
                 template,
                 settings.EMAIL_HOST_USER,
                 ["matiasfamilycrew@gmail.com"],
             )
-            # print("Creacion del correo ")
+
             # Formato del mensaje en HTML.
             emailSender.content_subtype = "html"
             emailSender.fail_silently = False
-            # Agregamos el PDF que hemos creado como adjunto al correo.
-            emailSender.attach_file(f"C:\\Users\\Plask91\\Documents\\Clinica\\clinica\\Clinica_DRF\\Boleta_PDF_PACIENTES\\{filename}")
+
+            # 6. Agregamos el PDF adjunto usando la ruta dinámica
+            emailSender.attach_file(ruta_archivo_final)
+
             # Enviamos el correo.
             emailSender.send()
+            print("Correo enviado con éxito.")
     except Exception as err:
         print(f"Unexpected {err=}, {type(err)=}")
         return Response({'error': 1}, status=400)
@@ -1411,44 +1521,96 @@ def correo_res_pagada(reserva_uuid, fk_descuento):
                     'reserva_pagada': 'Sí',
                     'valor_base': valor_base,
                 })
-                # Generar el PDF
+                # # Generar el PDF
+                # nombre_carpeta = "Boleta_PDF_PACIENTES"
+                # ruta = f"C:\\Users\\Plask91\\Documents\\Clinica\\clinica\\Clinica_DRF\\{nombre_carpeta}"
+                # if not os.path.exists(ruta):
+                #     os.makedirs(ruta)
+                #     print(f"Carpeta creada en: {ruta}")
+                # else:
+                #     pass
+                # now = datetime.now()
+                # filename = f"Boleta_Reserva_Cita_{nombre_completo}_{now.strftime('%Y-%m-%d_%H-%M-%S')}.pdf"
+                # # Creación del PDF.
+                # config = pdfkit.configuration(wkhtmltopdf='C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe')
+                # # Configuración de pdfkit
+                # options = {
+                #     'enable-local-file-access': None,
+                #     # 'orientation': 'Landscape',
+                #     # 'page-size': 'A4',
+                #     # 'margin-top': '0.2in',
+                #     # 'margin-bottom': '0.2in',
+                #     # 'encoding': "UTF-8",
+                # }
+                # print("Adjunto..........")
+                # # template; Pertenece 
+                # pdf = pdfkit.from_string(template, f"C:\\Users\\Plask91\\Documents\\Clinica\\clinica\\Clinica_DRF\\{nombre_carpeta}\\{filename}", configuration=config, options=options)
+                # # Envío del mensaje. Debemos pasar el template.
+                # emailSender = EmailMessage(
+                #     subject, 
+                #     template,
+                #     settings.EMAIL_HOST_USER,
+                #     ["matiasfamilycrew@gmail.com"],
+                # )
+                # # print("Creacion del correo ")
+                # # Formato del mensaje en HTML.
+                # emailSender.content_subtype = "html"
+                # emailSender.fail_silently = False
+                # # Agregamos el PDF que hemos creado como adjunto al correo.
+                # emailSender.attach_file(f"C:\\Users\\Plask91\\Documents\\Clinica\\clinica\\Clinica_DRF\\{nombre_carpeta}\\{filename}")
+                # # Enviamos el correo.
+                # emailSender.send()
+                # --- Generar el PDF ---
                 nombre_carpeta = "Boleta_PDF_PACIENTES"
-                ruta = f"C:\\Users\\Plask91\\Documents\\Clinica\\clinica\\Clinica_DRF\\{nombre_carpeta}"
-                if not os.path.exists(ruta):
-                    os.makedirs(ruta)
-                    print(f"Carpeta creada en: {ruta}")
-                else:
-                    pass
+
+                # Usamos BASE_DIR para que la ruta se adapte automáticamente al servidor
+                ruta_base = os.path.join(settings.BASE_DIR, nombre_carpeta)
+
+                if not os.path.exists(ruta_base):
+                    os.makedirs(ruta_base)
+                    print(f"Carpeta verificada/creada en: {ruta_base}")
+
                 now = datetime.now()
-                filename = f"Boleta_Reserva_Cita_{nombre_completo}_{now.strftime('%Y-%m-%d_%H-%M-%S')}.pdf"
-                # Creación del PDF.
-                config = pdfkit.configuration(wkhtmltopdf='C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe')
-                # Configuración de pdfkit
+                # Limpiamos el nombre para evitar problemas con espacios en sistemas Linux
+                nombre_archivo_limpio = nombre_completo.replace(" ", "_")
+                filename = f"Boleta_Reserva_Cita_{nombre_archivo_limpio}_{now.strftime('%Y-%m-%d_%H-%M-%S')}.pdf"
+
+                # Definimos la ruta completa del archivo de forma dinámica
+                ruta_pdf_final = os.path.join(ruta_base, filename)
+
+                # --- Configuración de pdfkit ---
+                # Detectamos el sistema para no buscar un .exe en Linux
+                if os.name == 'nt':  # Windows
+                    path_wkhtmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
+                    config = pdfkit.configuration(wkhtmltopdf=path_wkhtmltopdf)
+                else:  # Linux (PythonAnywhere)
+                    # En Linux, pdfkit busca el binario directamente en el sistema
+                    config = pdfkit.configuration()
+
                 options = {
                     'enable-local-file-access': None,
-                    # 'orientation': 'Landscape',
-                    # 'page-size': 'A4',
-                    # 'margin-top': '0.2in',
-                    # 'margin-bottom': '0.2in',
-                    # 'encoding': "UTF-8",
                 }
-                print("Adjunto..........")
-                # template; Pertenece 
-                pdf = pdfkit.from_string(template, f"C:\\Users\\Plask91\\Documents\\Clinica\\clinica\\Clinica_DRF\\{nombre_carpeta}\\{filename}", configuration=config, options=options)
-                # Envío del mensaje. Debemos pasar el template.
+
+                print("Adjuntando y generando PDF...")
+
+                # Generar el PDF usando la ruta dinámica (sin C:\\Users...)
+                pdfkit.from_string(template, ruta_pdf_final, configuration=config, options=options)
+
+                # --- Envío del mensaje ---
                 emailSender = EmailMessage(
                     subject, 
                     template,
                     settings.EMAIL_HOST_USER,
                     ["matiasfamilycrew@gmail.com"],
                 )
-                # print("Creacion del correo ")
-                # Formato del mensaje en HTML.
+
                 emailSender.content_subtype = "html"
                 emailSender.fail_silently = False
-                # Agregamos el PDF que hemos creado como adjunto al correo.
-                emailSender.attach_file(f"C:\\Users\\Plask91\\Documents\\Clinica\\clinica\\Clinica_DRF\\{nombre_carpeta}\\{filename}")
-                # Enviamos el correo.
+
+                # Agregamos el PDF adjunto usando la ruta dinámica universal
+                emailSender.attach_file(ruta_pdf_final)
+
+                # Enviamos el correo
                 emailSender.send()
             if fk_descuento != 0:
                 print("Ingresamos Correctamente")
@@ -1473,7 +1635,7 @@ def correo_res_pagada(reserva_uuid, fk_descuento):
                     # Creación del correo.
                     subject = "Correo Verificación Reserva"
                     # Crearemos el envío de correos.
-                    template = render_to_string("pacientes\correo_reserva.html",{
+                    template = render_to_string("pacientes/correo_reserva.html",{
                         'nombre_paciente': nombre_completo,
                         'rut_paciente': rut,
                         'email_paciente': email,
@@ -1537,7 +1699,7 @@ def correo_res_pagada(reserva_uuid, fk_descuento):
                 # Creación del correo.
                 subject = "Correo Verificación Reserva"
                 # Crearemos el envío de correos.
-                template = render_to_string("pacientes\correo_reserva.html",{
+                template = render_to_string("pacientes/correo_reserva.html",{
                     'nombre_paciente': nombre_completo,
                     'rut_paciente': rut,
                     'email_paciente': email,
@@ -1570,7 +1732,7 @@ def correo_res_pagada(reserva_uuid, fk_descuento):
                 # Creación del correo.
                 subject = "Correo Verificación Reserva"
                 # Crearemos el envío de correos.
-                template = render_to_string("pacientes\correo_reserva.html",{
+                template = render_to_string("pacientes/correo_reserva.html",{
                     'nombre_paciente': nombre_completo,
                     'rut_paciente': rut,
                     'email_paciente': email,
@@ -1619,28 +1781,65 @@ def correo_res_pagada(reserva_uuid, fk_descuento):
 # Creación PDF pago resrva creada por la SECRETARIA y pagada desde el panel PACIENTE.
 def pdf_res_pagada_pac(template, nombre_paciente, emailSender):
     try:
-        print("Creación PDF.")
+        # print("Creación PDF.")
+        # print("Creación PDF Paciente Panel Paciente")
+        # print("Ingresamos al PDF.")
+        # print(nombre_paciente)
+        # # Ruta base de la carpeta donde se almacenan los PDF.
+        # carpeta_destino = "C:\\Users\\Plask91\\Documents\\Clinica\\clinica\\Clinica_DRF\\BOLETA_PDF_PACIENTES"
+        # # Verificar si la carpeta existe, si no, la debemos crear.
+        # if not os.path.exists(carpeta_destino):
+        #     os.makedirs(carpeta_destino)
+        #     print(f"Carpeta creada: {carpeta_destino}")
+        # # Generación del nombre de archivo único
+        # now = datetime.now()
+        # filename = f"Boleta_Compra_{nombre_paciente}_{now.strftime('%Y-%m-%d_%H-%M-%S')}.pdf"
+        # # Creación del PDF.
+        # # Configuración de pdfkit
+        # config = pdfkit.configuration(wkhtmltopdf='C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe')
+        # options = {'enable-local-file-access': None}
+        # # Generar el PDF
+        # # template; Pertenece 
+        # pdf = pdfkit.from_string(template, f"C:\\Users\\Plask91\\Documents\\Clinica\\clinica\Clinica_DRF\\BOLETA_PDF_PACIENTES\\{filename}", configuration=config, options=options)
+        # #Envío del mensaje. Debemos pasar el template.
+        # emailSender.attach_file(f"C:\\Users\\Plask91\\Documents\\Clinica\\clinica\Clinica_DRF\\BOLETA_PDF_PACIENTES\\{filename}")
+        # --- Lógica de Generación de PDF ---
         print("Creación PDF Paciente Panel Paciente")
-        print("Ingresamos al PDF.")
-        print(nombre_paciente)
-        # Ruta base de la carpeta donde se almacenan los PDF.
-        carpeta_destino = "C:\\Users\\Plask91\\Documents\\Clinica\\clinica\\Clinica_DRF\\BOLETA_PDF_PACIENTES"
-        # Verificar si la carpeta existe, si no, la debemos crear.
+        print(f"Ingresamos al PDF para: {nombre_paciente}")
+
+        # 1. Definimos la carpeta de destino usando BASE_DIR para que funcione en Linux y Windows
+        carpeta_destino = os.path.join(settings.BASE_DIR, 'BOLETA_PDF_PACIENTES')
+
+        # Verificar si la carpeta existe, si no, la creamos
         if not os.path.exists(carpeta_destino):
             os.makedirs(carpeta_destino)
-            print(f"Carpeta creada: {carpeta_destino}")
-        # Generación del nombre de archivo único
+            print(f"Carpeta creada en: {carpeta_destino}")
+
+        # 2. Generación del nombre de archivo único (limpiando espacios para Linux)
         now = datetime.now()
-        filename = f"Boleta_Compra_{nombre_paciente}_{now.strftime('%Y-%m-%d_%H-%M-%S')}.pdf"
-        # Creación del PDF.
-        # Configuración de pdfkit
-        config = pdfkit.configuration(wkhtmltopdf='C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe')
+        nombre_archivo_paciente = nombre_paciente.replace(" ", "_")
+        filename = f"Boleta_Compra_{nombre_archivo_paciente}_{now.strftime('%Y-%m-%d_%H-%M-%S')}.pdf"
+
+        # 3. Ruta completa final del PDF
+        ruta_final_pdf = os.path.join(carpeta_destino, filename)
+
+        # 4. Configuración de pdfkit (Detección de Sistema Operativo)
+        # Esto evita errores al buscar el .exe en servidores Linux
+        if os.name == 'nt':  # Si es Windows
+            path_wkhtmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
+            config = pdfkit.configuration(wkhtmltopdf=path_wkhtmltopdf)
+        else:  # Si es Linux (PythonAnywhere)
+            config = pdfkit.configuration()
+
         options = {'enable-local-file-access': None}
-        # Generar el PDF
-        # template; Pertenece 
-        pdf = pdfkit.from_string(template, f"C:\\Users\\Plask91\\Documents\\Clinica\\clinica\Clinica_DRF\\BOLETA_PDF_PACIENTES\\{filename}", configuration=config, options=options)
-        #Envío del mensaje. Debemos pasar el template.
-        emailSender.attach_file(f"C:\\Users\\Plask91\\Documents\\Clinica\\clinica\Clinica_DRF\\BOLETA_PDF_PACIENTES\\{filename}")
+
+        # 5. Generar el PDF usando la ruta dinámica universal
+        # Eliminamos las rutas fijas C:\\Users...
+        pdfkit.from_string(template, ruta_final_pdf, configuration=config, options=options)
+
+        # 6. Envío del mensaje adjuntando el archivo
+        # Usamos la misma variable dinámica para asegurar que encuentre el archivo
+        emailSender.attach_file(ruta_final_pdf)
     except Exception as err:
         print(f"Unexpected {err=}, {type(err)=}")
         return Response({'error': 0}, status=400)
