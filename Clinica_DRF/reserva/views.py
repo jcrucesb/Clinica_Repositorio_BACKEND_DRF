@@ -1843,3 +1843,16 @@ def pdf_res_pagada_pac(template, nombre_paciente, emailSender):
     except Exception as err:
         print(f"Unexpected {err=}, {type(err)=}")
         return Response({'error': 0}, status=400)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def listar_reservas(request):
+    try:
+        print("Ingresamos Correctamente a Listar Reservas")
+        all_reservas = ReservaModel.objects.all()
+        serializer = ReservaSerializer(all_reservas, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    except Exception as err:
+        print(f"Unexpected {err=}, {type(err)=}")
+        return Response({'error': 1}, status=400)
