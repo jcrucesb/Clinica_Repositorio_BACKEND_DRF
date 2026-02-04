@@ -12,24 +12,36 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 import os
 from pathlib import Path
+import environ
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# 1. INICIALIZAR EL OBJETO ENV (ESTO ES LO QUE TE FALTA)
+env = environ.Env(
+    DEBUG=(bool, False) # Esto permite que DEBUG sea tratado como Booleano
+)
+# 2. Leer el archivo .env ubicado en la raíz del proyecto
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-#SECRET_KEY = ''
+SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = os.environ.get('DEBUG') == 'True'
 
 ALLOWED_HOSTS = ['jacruces91.pythonanywhere.com', 'localhost', '127.0.0.1']
-
+# Permitir solo tu origen local específico (Recomendado)
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5500",
+    "http://127.0.0.1:5500",
+    "http://localhost:3000",
+]
 # Application definition
-#CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_CREDENTIALS = True
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -78,7 +90,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         # Colocamos la ruta templates para lostemplate de los correos que se enviaran.
-        'DIRS': [BASE_DIR / 'templates'], 
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -147,13 +159,14 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'usuarios.CustomersUsers'
 
-#Configuracion de Correo EMAIL para el envío de correos.
-# EMAIL_BACKEND = ""
-# EMAIL_HOST = ""
-# EMAIL_USE_TLS = 
-# EMAIL_PORT = 
-# EMAIL_HOST_USER = ""
-# EMAIL_HOST_PASSWORD = ""
+# Llamamos la variable de entorno para el GMAIL.
+EMAIL_BACKEND=env("EMAIL_BACKEND")
+EMAIL_HOST=env("EMAIL_HOST")
+EMAIL_PORT=env.int("EMAIL_PORT")
+EMAIL_USE_TLS=env.bool("EMAIL_USE_TLS")
+EMAIL_HOST_USER=env("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD=env("EMAIL_HOST_PASSWORD")
+
 
 # Configuración de Django Rest Framework (DRF)
 # Este código siempre debe estar.
