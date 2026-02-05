@@ -40,6 +40,6 @@ urlpatterns = [
     path('reserva/pago_credito_reserva_index', views.pago_credito_reserva_index, name='pago_credito_reserva_index'),
     ##############################################################################################################################
     # Esa ruta es solo para el microservicio de reservas. COMO PRUEBA.
-    path('https://jacruces91.pythonanywhere.com/listar_reservas', views.listar_reservas, name='listar_reservas'),
+    path('reserva/api/listar_reservas/', views.listar_reservas, name='listar_reservas'),
     ##############################################################################################################################
 ]
