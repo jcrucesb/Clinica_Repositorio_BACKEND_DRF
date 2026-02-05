@@ -1850,7 +1850,10 @@ def pdf_res_pagada_pac(template, nombre_paciente, emailSender):
 def listar_reservas(request):
     try:
         print("Ingresamos Correctamente a Listar Reservas")
-        all_reservas = ReservaModel.objects.all()
+        # Obtener la fecha actual.
+        fecha_today = date.today()
+        # Realizamos el filtro para obtener las reservas del día actual.
+        all_reservas = ReservaModel.objects.filter(fecha_reserva=fecha_today)
         serializer = ReservaSerializer(all_reservas, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     except Exception as err:
